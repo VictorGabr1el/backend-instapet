@@ -40,4 +40,7 @@ app.delete("/delete/:id", loginRouter);
 
 // ------------ socket io ------------ //
 
-app.listen(3010, console.log("server rodando na porta 3010"));
+app.listen(
+  process.env.PORT || 5000,
+  console.log("server rodando na porta 3010")
+);
