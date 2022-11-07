@@ -104,11 +104,3 @@ commentaryRouter.get(
 );
 
 export default commentaryRouter;
-
-// realizar busca no banco de dados apos fazer nova postagem, comentario, alteração de foto do perfil
-//
-// utilizar socket io na criação do chat
-//
-//
-//
-//

@@ -23,6 +23,7 @@ app.get("/user", loginRouter);
 app.post("/user/:userId/post", postRouter);
 app.get("/post", postRouter);
 app.get("/user/:userId/post", postRouter);
+app.get("/post/:postId", postRouter);
 app.delete("/user/:userId/post/:postId", postRouter);
 
 //  --------------- Comentary --------------- //
@@ -42,5 +43,5 @@ app.delete("/delete/:id", loginRouter);
 
 app.listen(
   process.env.PORT || 5000,
-  console.log("server rodando na porta 3010")
+  console.log("server rodando na porta 5000")
 );

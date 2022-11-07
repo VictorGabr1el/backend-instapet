@@ -1,0 +1,67 @@
+SELECT * FROM "Posts" ORDER BY random() LIMIT 5;
+
+
+SELECT * FROM "Posts" WHERE user_id != follow_id ORDER BY random() LIMIT 5;
+
+
+ const post = await User.findByPk(id.userId, {
+    include: [
+      {
+        model: Post,
+        attributes: ["post_id", "img_post", "legend", "createdAt"],
+        separate: true,
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Comment,
+            attributes: ["comment_id", "content", "createdAt"],
+            include: [
+              {
+                model: User,
+                attributes: ["user_id", "avatar", "username", "createdAt"],
+              },
+            ],
+            separate: true,
+            order: [["createdAt", "DESC"]],
+          },
+        ],
+      },
+      {
+        model: Following,
+        attributes: ["userId", "idUser", "id"],
+        include: [
+          {
+            model: User,
+            attributes: ["user_id", "avatar", "username"],
+            include: [
+              {
+                model: Post,
+                include: [
+                  {
+                    model: Comment,
+                    attributes: ["comment_id", "content", "createdAt"],
+                    include: [
+                      {
+                        model: User,
+                        attributes: [
+                          "user_id",
+                          "avatar",
+                          "username",
+                          "createdAt",
+                        ],
+                      },
+                    ],
+                    separate: true,
+                    order: [["createdAt", "DESC"]],
+                  },
+                ],
+                attributes: ["post_id", "img_post", "legend", "createdAt"],
+                order: [["createdAt", "DESC"]],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    attributes: ["user_id", "avatar", "username"],
+  });

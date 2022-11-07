@@ -1,6 +1,5 @@
 import express from "express";
 import { sequelize, User, Post, Comment } from "../model/index.js";
-import { Op, QueryTypes } from "sequelize";
 
 const postRouter = express.Router();
 
@@ -93,7 +92,54 @@ postRouter.get("/post", async (req, res) => {
 postRouter.get("/user/:userId/post", async (req, res) => {
   const id = req.params;
   const userId = id.userId;
-  const posts = await User.findByPk(userId, { include: Post });
+  const posts = await Post.findAll({
+    where: {
+      userId: userId,
+    },
+  });
+
+  if (!posts) {
+    return res.status(400).json({ message: "postagens não encontradas" });
+  }
+
+  try {
+    return res.status(200).json(posts);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "ocrreu um erro, tente mais tarde", error });
+  }
+});
+
+// ------------------- ONE POST -------------------- //
+//                                                     //
+
+postRouter.get("/post/:postId", async (req, res) => {
+  const id = req.params;
+  const postId = id.postId;
+
+  if (!postId) {
+    return res.status(400).json({ message: "publicação não encontrada" });
+  }
+  const posts = await Post.findByPk(postId, {
+    include: [
+      {
+        model: User,
+        attributes: ["user_id", "avatar", "username"],
+      },
+      {
+        model: Comment,
+        attributes: ["comment_id", "content", "createdAt"],
+        include: {
+          model: User,
+          attributes: ["user_id", "avatar", "username", "createdAt"],
+        },
+        separate: true,
+        order: [["createdAt", "DESC"]],
+      },
+    ],
+    attributes: ["post_id", "img_post", "legend", "createdAt"],
+  });
 
   if (!posts) {
     return res.status(400).json({ message: "postagens não encontradas" });

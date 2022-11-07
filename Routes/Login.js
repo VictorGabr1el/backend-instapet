@@ -1,6 +1,6 @@
 import express, { json } from "express";
-import { Comment, Post, sequelize, User } from "../model/index.js";
-import { Op, QueryTypes } from "sequelize";
+import { sequelize, User } from "../model/index.js";
+import { QueryTypes } from "sequelize";
 import Jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import verifytoken from "../middlewares/verifytoken.js";
@@ -24,6 +24,11 @@ loginRouter.post("/register", async (req, res) => {
 
   if (!email) {
     return res.status(400).json({ message: "digite seu email" });
+  }
+  if (!avatar) {
+    return res
+      .status(400)
+      .json({ message: "adicione uma imagem no seu perfil" });
   }
 
   if (!password) {
@@ -145,7 +150,7 @@ loginRouter.get("/logado", verifytoken, async (req, res) => {
   }
 
   const user = await sequelize.query(
-    `SELECT "user_id", "username", "avatar", "name" FROM "Users" WHERE "user_id" = ${Id}`,
+    `SELECT  FROM "Users" WHERE "user_id" = ${Id}`,
     {
       type: QueryTypes.SELECT,
     }
