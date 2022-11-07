@@ -30,16 +30,6 @@ app.delete("/user/:userId/post/:postId", postRouter);
 
 app.post("/user/:userId/post/:postId/comment", commentaryRouter);
 app.get("/user/:userId/post/:postId/comment/:commentId", commentaryRouter);
-app.get("/comment", commentaryRouter);
-app.get("/commente", commentaryRouter);
-app.get("/test", commentaryRouter);
-
-// ------------ rotas de teste ------------ //
-
-app.get("/", loginRouter);
-app.delete("/delete/:id", loginRouter);
-
-// ------------ socket io ------------ //
 
 app.listen(
   process.env.PORT || 5000,

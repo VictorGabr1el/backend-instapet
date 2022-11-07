@@ -149,12 +149,11 @@ loginRouter.get("/logado", verifytoken, async (req, res) => {
     return res.status(401).json({ message: "acesso negado, token inválido" });
   }
 
-  const user = await sequelize.query(
-    `SELECT  FROM "Users" WHERE "user_id" = ${Id}`,
-    {
-      type: QueryTypes.SELECT,
-    }
-  );
+  const user = await User.findByPk(Id, {
+    attributes: ["name", "avatar", "username", "user_id"],
+  });
+
+  console.log(user);
 
   try {
     return res.status(200).json(user);

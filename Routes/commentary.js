@@ -83,11 +83,6 @@ commentaryRouter.get(
     }
 
     const findComment = await Comment.findByPk(commentId);
-    //   include: {
-    //     model: User,
-    //     attributes: ["user_id", "avatar", "username", "createdAt"],
-    //   },
-    // });
 
     if (!findComment) {
       return res.status(400).json({ message: "postagens não encontradas" });
