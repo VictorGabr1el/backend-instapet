@@ -144,7 +144,6 @@ loginRouter.post("/login", async (req, res) => {
 loginRouter.get("/logado", verifytoken, async (req, res) => {
   const Id = req.id;
 
-  console.log(Id);
   if (!Id) {
     return res.status(401).json({ message: "acesso negado, token inválido" });
   }
@@ -152,8 +151,6 @@ loginRouter.get("/logado", verifytoken, async (req, res) => {
   const user = await User.findByPk(Id, {
     attributes: ["name", "avatar", "username", "user_id"],
   });
-
-  console.log(user);
 
   try {
     return res.status(200).json(user);
