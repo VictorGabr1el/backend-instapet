@@ -1,6 +1,6 @@
 import express, { json } from "express";
 import { sequelize, User } from "../model/index.js";
-import { QueryTypes } from "sequelize";
+import { Op, QueryTypes } from "sequelize";
 import Jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import verifytoken from "../middlewares/verifytoken.js";
@@ -11,15 +11,26 @@ const loginRouter = express.Router();
 //                                                      //
 
 loginRouter.post("/register", async (req, res) => {
-  console.log(req.data);
   const { name, username, avatar, email, password, confirmPass } = req.body;
 
   if (!name) {
     return res.status(400).json({ message: "digite seu primeiro nome" });
   }
 
+  if (name.lenght > 40) {
+    return res
+      .status(400)
+      .json({ message: "O nome não pode ter mais de 40 caracteres" });
+  }
+
   if (!username) {
     return res.status(400).json({ message: "digite seu segundo nome" });
+  }
+
+  if (username > 20) {
+    return res
+      .status(400)
+      .json({ message: "O username não pode ter mais de 20 caracteres" });
   }
 
   if (!email) {
@@ -102,8 +113,6 @@ function gerartoken(params = {}) {
 loginRouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  console.log(req.body);
-
   if (!email) {
     return res.status(400).json({ message: "digite seu email" });
   }
@@ -128,7 +137,6 @@ loginRouter.post("/login", async (req, res) => {
   user.password = undefined;
 
   try {
-    console.log(json(user));
     return res
       .status(200)
       .json({ user, token: gerartoken({ params: user.user_id }) });
@@ -184,6 +192,11 @@ loginRouter.delete("/delete/:id", async (req, res) => {
 loginRouter.get("/user", async (req, res) => {
   const user = await User.findAll({
     attributes: ["user_id", "username", "avatar"],
+    where: {
+      user_id: {
+        [Op.ne]: userId,
+      },
+    },
   });
   if (!user) {
     return res.status(404).json({ message: "Usuarios não encontrados" });
