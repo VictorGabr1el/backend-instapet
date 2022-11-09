@@ -192,11 +192,6 @@ loginRouter.delete("/delete/:id", async (req, res) => {
 loginRouter.get("/user", async (req, res) => {
   const user = await User.findAll({
     attributes: ["user_id", "username", "avatar"],
-    where: {
-      user_id: {
-        [Op.ne]: userId,
-      },
-    },
   });
   if (!user) {
     return res.status(404).json({ message: "Usuarios não encontrados" });
