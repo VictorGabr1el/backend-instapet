@@ -1,6 +1,5 @@
 import express from "express";
-import { Comment, sequelize, Post, User, Following } from "../model/index.js";
-import { QueryTypes } from "sequelize";
+import { Comment, Post, User, Following } from "../model/index.js";
 
 const followingRouter = express.Router();
 
