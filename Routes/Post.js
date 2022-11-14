@@ -168,8 +168,6 @@ postRouter.delete("/user/:userId/post/:postId", async (req, res) => {
     where: { userId: userId, post_id: postId },
   });
 
-  console.log(Boolean(user));
-
   if (!user) {
     return res.status(400).json({ message: "usuario não encontrado" });
   }

@@ -1,6 +1,6 @@
 import express, { json } from "express";
 import { sequelize, User } from "../model/index.js";
-import { QueryTypes } from "sequelize";
+import { Op, QueryTypes } from "sequelize";
 import Jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import verifytoken from "../middlewares/verifytoken.js";
@@ -15,8 +15,20 @@ loginRouter.post("/register", async (req, res) => {
     return res.status(400).json({ message: "digite seu primeiro nome" });
   }
 
+  if (name.lenght > 40) {
+    return res
+      .status(400)
+      .json({ message: "O nome não pode ter mais de 40 caracteres" });
+  }
+
   if (!username) {
     return res.status(400).json({ message: "digite seu segundo nome" });
+  }
+
+  if (username > 20) {
+    return res
+      .status(400)
+      .json({ message: "O username não pode ter mais de 20 caracteres" });
   }
 
   if (!email) {
