@@ -1,6 +1,5 @@
-import express, { json } from "express";
-import { sequelize, User } from "../model/index.js";
-import { Op, QueryTypes } from "sequelize";
+import express from "express";
+import { User } from "../model/index.js";
 import Jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import verifytoken from "../middlewares/verifytoken.js";
