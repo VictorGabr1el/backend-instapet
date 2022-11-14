@@ -6,12 +6,9 @@ import bcrypt from "bcrypt";
 import verifytoken from "../middlewares/verifytoken.js";
 const loginRouter = express.Router();
 
-//                                                      //
 // -------------------- REGISTER ---------------------- //
-//                                                      //
 
 loginRouter.post("/register", async (req, res) => {
-  console.log(req.data);
   const { name, username, avatar, email, password, confirmPass } = req.body;
 
   if (!name) {
@@ -81,7 +78,7 @@ loginRouter.post("/register", async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "não foi possivel relizar seu cadastro" });
+      .json({ message: "não foi possivel relizar seu cadastro", error });
   }
 });
 
@@ -95,14 +92,10 @@ function gerartoken(params = {}) {
   return token;
 }
 
-//                                               //
 // ------------------- LOGIN ------------------- //
-//                                               //
 
 loginRouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
-
-  console.log(req.body);
 
   if (!email) {
     return res.status(400).json({ message: "digite seu email" });
@@ -128,7 +121,6 @@ loginRouter.post("/login", async (req, res) => {
   user.password = undefined;
 
   try {
-    console.log(json(user));
     return res
       .status(200)
       .json({ user, token: gerartoken({ params: user.user_id }) });
@@ -137,9 +129,7 @@ loginRouter.post("/login", async (req, res) => {
   }
 });
 
-//                                                     //
 // --------------------- LOGADO ---------------------- //
-//                                                     //
 
 loginRouter.get("/logado", verifytoken, async (req, res) => {
   const Id = req.id;
@@ -161,9 +151,7 @@ loginRouter.get("/logado", verifytoken, async (req, res) => {
   }
 });
 
-//                                                      //
 // ------------------ DELETE ACCOUNT ------------------ //
-//                                                      //
 
 loginRouter.delete("/delete/:id", async (req, res) => {
   const id = req.params;
@@ -177,9 +165,7 @@ loginRouter.delete("/delete/:id", async (req, res) => {
   return res.status(200).json({ message: "usuario deletado" });
 });
 
-//
 // ----------------- FIND USERS ------------------
-//
 
 loginRouter.get("/user", async (req, res) => {
   const user = await User.findAll({

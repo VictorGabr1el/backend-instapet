@@ -3,9 +3,7 @@ import { sequelize, User, Post, Comment } from "../model/index.js";
 
 const postRouter = express.Router();
 
-//                                                      //
 // -------------------- CREATE ---------------------- //
-//                                                      //
 
 postRouter.post("/user/:userId/post", async (req, res) => {
   const { img, legend } = req.body;
@@ -46,9 +44,7 @@ postRouter.post("/user/:userId/post", async (req, res) => {
   }
 });
 
-//                                                   //
 // ------------------- ALL POSTS ------------------- //
-//                                                   //
 
 postRouter.get("/post", async (req, res) => {
   const post = await Post.findAll({
@@ -85,9 +81,7 @@ postRouter.get("/post", async (req, res) => {
   }
 });
 
-//                                                     //
 // ------------------- USER POSTS -------------------- //
-//                                                     //
 
 postRouter.get("/user/:userId/post", async (req, res) => {
   const id = req.params;
@@ -112,7 +106,6 @@ postRouter.get("/user/:userId/post", async (req, res) => {
 });
 
 // ------------------- ONE POST -------------------- //
-//                                                     //
 
 postRouter.get("/post/:postId", async (req, res) => {
   const id = req.params;

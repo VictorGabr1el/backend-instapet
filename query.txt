@@ -65,3 +65,12 @@ SELECT * FROM "Posts" WHERE user_id != follow_id ORDER BY random() LIMIT 5;
     ],
     attributes: ["user_id", "avatar", "username"],
   });
+
+  tentar depois associação 
+  Following.hasOne(User)
+  Following.hasMany(Users)
+
+
+  ver documentação sequelize v7
+
+

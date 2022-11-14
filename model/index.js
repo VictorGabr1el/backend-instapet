@@ -2,6 +2,7 @@ import { sequelize } from "./db.js";
 import { User } from "./User.js";
 import { Post } from "./Post.js";
 import { Comment } from "./Comment.js";
+import { Following } from "./Following.js";
 
 // (async () => {
 //   await sequelize
@@ -12,4 +13,4 @@ import { Comment } from "./Comment.js";
 //     });
 // })();
 
-export { sequelize, User, Post, Comment };
+export { sequelize, User, Post, Comment, Following };

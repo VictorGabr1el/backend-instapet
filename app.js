@@ -2,7 +2,12 @@ import express from "express";
 import cors from "cors";
 import * as dotenv from "dotenv";
 
-import { loginRouter, postRouter, commentaryRouter } from "./Routes/index.js";
+import {
+  loginRouter,
+  postRouter,
+  commentaryRouter,
+  followingRouter,
+} from "./Routes/index.js";
 
 dotenv.config();
 const app = express();
@@ -30,6 +35,12 @@ app.delete("/user/:userId/post/:postId", postRouter);
 
 app.post("/user/:userId/post/:postId/comment", commentaryRouter);
 app.get("/user/:userId/post/:postId/comment/:commentId", commentaryRouter);
+
+//
+
+app.post("/user/:userId/following/:following", followingRouter);
+app.get("/following", followingRouter);
+app.get("/k", followingRouter);
 
 app.listen(
   process.env.PORT || 5000,
