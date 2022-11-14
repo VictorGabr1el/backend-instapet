@@ -1,4 +1,5 @@
 import { Sequelize } from "sequelize";
+import * as pg from "pg";
 
 const name = process.env.DB_NAME;
 const user = process.env.DB_USER;
@@ -9,7 +10,7 @@ const port = process.env.DB_PORT;
 export const sequelize = new Sequelize(name, user, pass, {
   host: host,
   port: port,
-  dialect: "postgres",
+  dialect: pg,
 });
 try {
   await sequelize.authenticate();
