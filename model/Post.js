@@ -1,9 +1,10 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "./db.js";
+import { Following } from "./Following.js";
 import { User } from "./User.js";
 
 export const Post = sequelize.define("Posts", {
-  post_id: {
+  id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,

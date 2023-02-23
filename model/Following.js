@@ -2,14 +2,18 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "./db.js";
 import { User } from "./User.js";
 
-export const Following = sequelize.define("Following");
-
-User.hasMany(Following, {
-  as: "seguidores",
-  foreignKey: "following_id",
+export const Following = sequelize.define("Following", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
 });
 
 Following.belongsTo(User, {
-  constraints: true,
+  foreignKey: "follow",
+});
+
+User.hasMany(Following, {
   foreignKey: "userId",
 });

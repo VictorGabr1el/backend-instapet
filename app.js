@@ -3,9 +3,9 @@ import cors from "cors";
 import * as dotenv from "dotenv";
 
 import {
-  loginRouter,
+  userRouter,
   postRouter,
-  commentaryRouter,
+  commentRouter,
   followingRouter,
 } from "./Routes/index.js";
 
@@ -18,31 +18,33 @@ app.use(express.urlencoded({ extended: true }));
 
 // ------------ rotas principais ------------//
 
-app.post("/register", loginRouter);
-app.post("/login", loginRouter);
-app.get("/logado", loginRouter);
-app.get("/user", loginRouter);
+app.post("/register", userRouter);
+app.post("/login", userRouter);
+app.get("/logado", userRouter);
+app.get("/users", userRouter);
+app.get("/user/:userId", userRouter);
 
 //  --------------- postagens --------------- //
 
-app.post("/user/:userId/post", postRouter);
+app.post("/post", postRouter);
 app.get("/post", postRouter);
-app.get("/user/:userId/post", postRouter);
+app.get("/:userId/post", postRouter);
 app.get("/post/:postId", postRouter);
-app.delete("/user/:userId/post/:postId", postRouter);
+app.delete("/post/:postId", postRouter);
 
 //  --------------- Comentary --------------- //
 
-app.post("/user/:userId/post/:postId/comment", commentaryRouter);
-app.get("/user/:userId/post/:postId/comment/:commentId", commentaryRouter);
+app.post("/comment", commentRouter);
+app.get("/comment/:commentId", commentRouter);
+app.delete("/comment/:commentId", commentRouter);
 
 //
 
-app.post("/user/:userId/following/:following", followingRouter);
-app.get("/following", followingRouter);
-app.get("/k", followingRouter);
+app.post("/following/:followId", followingRouter);
+app.get("/following/:followId", followingRouter);
+app.delete("/following/:followId", followingRouter);
 
 app.listen(
-  process.env.PORT || 5000,
-  console.log("server rodando na porta 5000")
+  process.env.PORT,
+  console.log(`server rodando na porta ${process.env.PORT}`)
 );

@@ -1,5 +1,6 @@
 import express from "express";
-import { Comment, Post, User, Following } from "../model/index.js";
+import verifytoken from "../middlewares/verifytoken.js";
+import { User, Following } from "../model/index.js";
 
 const followingRouter = express.Router();
 
@@ -7,15 +8,13 @@ const followingRouter = express.Router();
 // --------------------- CREATE ----------------------- //
 //                                                      //
 
-followingRouter.post("/user/:userId/following/:following", async (req, res) => {
-  const id = req.params;
-
-  const userId = id.userId;
-  const followId = id.following;
+followingRouter.post("/following/:followId", verifytoken, async (req, res) => {
+  const userId = req.id;
+  const followId = req.params.followId;
 
   const follow = await Following.create({
     userId: userId,
-    following_id: followId,
+    follow: followId,
   });
 
   try {
@@ -27,75 +26,65 @@ followingRouter.post("/user/:userId/following/:following", async (req, res) => {
   }
 });
 
-followingRouter.get("/following", async (req, res) => {
-  console.log("ola");
-  //   const post = await Following.findAll();
-  const post = await Following.findAll({
-    attributes: ["userId", "following_id", "id"],
-    include: [
-      {
-        model: User,
-        attributes: ["user_id", "avatar", "username"],
-        include: [
-          {
-            model: Post,
-            include: [
-              {
-                model: Comment,
-                attributes: ["comment_id", "content", "createdAt"],
-                include: [
-                  {
-                    model: User,
-                    attributes: ["user_id", "avatar", "username", "createdAt"],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        model: User,
-        attributes: ["user_id", "avatar", "username"],
-        include: [
-          {
-            model: Post,
-            include: [
-              {
-                model: Comment,
-                attributes: ["comment_id", "content", "createdAt"],
-                include: [
-                  {
-                    model: User,
-                    attributes: ["user_id", "avatar", "username", "createdAt"],
-                  },
-                ],
-                separate: true,
-                order: [["createdAt", "DESC"]],
-              },
-            ],
-            attributes: ["post_id", "img_post", "legend", "createdAt"],
-            order: [["createdAt", "DESC"]],
-          },
-        ],
-      },
-    ],
+followingRouter.get("/following/:followId", async (req, res) => {
+  const followId = req.params.followId;
+
+  const followers = await Following.findAll({
+    where: {
+      follow: followId,
+    },
   });
 
-  if (!post) {
-    return res.status(400).json({ message: "posts não encontrados" });
-  }
+  const followersId = followers.map((users) => users.userId);
+
+  const followersResult = await User.findAll({
+    where: {
+      id: followersId,
+    },
+  });
+
   try {
-    return res.status(201).json({ message: "seus posts", post });
+    return res.status(201).json(followersResult);
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "não foi possivel fazer comentário", error });
+      .json({ message: "Desculpe ocoreu um erro, tente mais tarder", error });
   }
 });
 
-followingRouter.get("/k", (req, res) => {
-  return "olá";
-});
+followingRouter.delete(
+  "/following/:followId",
+  verifytoken,
+  async (req, res) => {
+    const userId = req.id;
+
+    const followId = req.params.followId;
+
+    if (!userId) {
+      res
+        .status(400)
+        .json({ message: "não foi possivel deixar de seguir este perfil" });
+    }
+
+    if (Boolean(followId) === false) {
+      res.status(400).json({
+        message: "não foi possivel deixar de seguir, perfil não encontrado",
+      });
+    }
+
+    Following.destroy({
+      where: {
+        userId: userId,
+        follow: followId,
+      },
+    })
+      .then(() => {
+        return res.status(200).json({ message: "pronto" });
+      })
+      .catch((error) => {
+        return res.status(500).json(error);
+      });
+  }
+);
 
 export default followingRouter;

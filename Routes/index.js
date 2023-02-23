@@ -1,6 +1,6 @@
-import loginRouter from "./Login.js";
+import userRouter from "./User.js";
 import postRouter from "./Post.js";
-import commentaryRouter from "./commentary.js";
-import followingRouter from "./following.js";
+import commentRouter from "./Comment.js";
+import followingRouter from "./Following.js";
 
-export { loginRouter, postRouter, commentaryRouter, followingRouter };
+export { userRouter, postRouter, commentRouter, followingRouter };

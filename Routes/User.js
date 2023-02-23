@@ -1,17 +1,18 @@
 import express from "express";
-import { User } from "../model/index.js";
+import { Following, Post, User } from "../model/index.js";
 import Jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import verifytoken from "../middlewares/verifytoken.js";
-const loginRouter = express.Router();
+
+const userRouter = express.Router();
 
 // -------------------- REGISTER ---------------------- //
 
-loginRouter.post("/register", async (req, res) => {
+userRouter.post("/register", async (req, res) => {
   const { name, username, avatar, email, password, confirmPass } = req.body;
 
   if (!name) {
-    return res.status(400).json({ message: "digite seu primeiro nome" });
+    return res.status(400).json({ message: "digite seu nome completo" });
   }
 
   if (name.lenght > 40) {
@@ -21,7 +22,7 @@ loginRouter.post("/register", async (req, res) => {
   }
 
   if (!username) {
-    return res.status(400).json({ message: "digite seu segundo nome" });
+    return res.status(400).json({ message: "digite um username" });
   }
 
   if (username > 20) {
@@ -67,7 +68,7 @@ loginRouter.post("/register", async (req, res) => {
     return res.status(400).json({ message: "esse username já está em uso" });
   }
 
-  const salt = await bcrypt.genSalt(12);
+  const salt = await bcrypt.genSalt(11);
   const hash = await bcrypt.hash(password, salt);
 
   const user = User.build({
@@ -85,7 +86,7 @@ loginRouter.post("/register", async (req, res) => {
 
     return res
       .status(201)
-      .json({ user, token: gerartoken({ params: user.user_id }) });
+      .json({ user, token: gerartoken({ params: user.id }) });
   } catch (error) {
     return res
       .status(500)
@@ -105,7 +106,7 @@ function gerartoken(params = {}) {
 
 // ------------------- LOGIN ------------------- //
 
-loginRouter.post("/login", async (req, res) => {
+userRouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   if (!email) {
@@ -134,7 +135,7 @@ loginRouter.post("/login", async (req, res) => {
   try {
     return res
       .status(200)
-      .json({ user, token: gerartoken({ params: user.user_id }) });
+      .json({ user, token: gerartoken({ params: user.id }) });
   } catch (error) {
     return res.status(501).json(error);
   }
@@ -142,15 +143,28 @@ loginRouter.post("/login", async (req, res) => {
 
 // --------------------- LOGADO ---------------------- //
 
-loginRouter.get("/logado", verifytoken, async (req, res) => {
+userRouter.get("/logado", verifytoken, async (req, res) => {
   const Id = req.id;
 
   if (!Id) {
-    return res.status(401).json({ message: "acesso negado, token inválido" });
+    return res.status(401).json({
+      message: "acesso negado, token inválido, não retornou id",
+    });
   }
 
   const user = await User.findByPk(Id, {
-    attributes: ["name", "avatar", "username", "user_id"],
+    attributes: ["name", "avatar", "username", "id"],
+    include: [
+      {
+        model: Following,
+        include: [
+          {
+            model: User,
+            attributes: ["id", "avatar", "username"],
+          },
+        ],
+      },
+    ],
   });
 
   try {
@@ -164,24 +178,50 @@ loginRouter.get("/logado", verifytoken, async (req, res) => {
 
 // ------------------ DELETE ACCOUNT ------------------ //
 
-loginRouter.delete("/delete/:id", async (req, res) => {
-  const id = req.params;
+userRouter.delete("/deleteaccount", verifytoken, async (req, res) => {
+  const id = req.id;
 
-  const user = await User.destroy({ where: { user_id: id.id } });
+  const { password } = req.body;
 
-  if (Boolean(user) === false) {
-    return res.status(404).json({ message: "Usuarios não encontrados" });
+  if (!password) {
+    res.status(400).json({ message: "digite sua senha" });
+  }
+  if (!id) {
+    res
+      .status(400)
+      .json({ message: "não foi possivel deletar usuario, id não encontrado" });
   }
 
-  return res.status(200).json({ message: "usuario deletado" });
+  const user = await User.findOne({ where: { id: id, password: password } });
+
+  if (Boolean(user) === false) {
+    return res.status(400).json({ message: "você digitou a senha errada" });
+  }
+
+  const deleteUser = await User.destroy({
+    where: {
+      id: id,
+      password: password,
+    },
+  });
+
+  if (!deleteUser) {
+    return res
+      .status(400)
+      .json({ message: "não foi possivel deletar usuario" });
+  }
+
+  try {
+    return res.status(200).json({ message: "usuario deletado" });
+  } catch (error) {
+    return res.status(500).json(error);
+  }
 });
 
 // ----------------- FIND USERS ------------------
 
-loginRouter.get("/user", async (req, res) => {
-  const user = await User.findAll({
-    attributes: ["user_id", "username", "avatar"],
-  });
+userRouter.get("/users", async (req, res) => {
+  const user = await User.findAll();
   if (!user) {
     return res.status(404).json({ message: "Usuarios não encontrados" });
   }
@@ -192,4 +232,28 @@ loginRouter.get("/user", async (req, res) => {
   }
 });
 
-export default loginRouter;
+userRouter.get("/user/:userId", async (req, res) => {
+  const userId = Number(req.params.userId);
+
+  console.log(userId);
+
+  if (!userId) {
+    return res.status(404).json({ message: "id não encontrado" });
+  }
+
+  const user = await User.findByPk(userId, {
+    include: Post,
+  });
+
+  if (!user) {
+    return res.status(404).json({ message: "Usuarios não encontrados" });
+  }
+
+  try {
+    return res.status(200).json(user);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+});
+
+export default userRouter;

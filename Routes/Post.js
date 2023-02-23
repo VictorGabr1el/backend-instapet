@@ -1,13 +1,21 @@
 import express from "express";
-import { sequelize, User, Post, Comment } from "../model/index.js";
+import { sequelize, User, Post, Comment, Following } from "../model/index.js";
+import verifytoken from "../middlewares/verifytoken.js";
 
 const postRouter = express.Router();
 
 // -------------------- CREATE ---------------------- //
 
-postRouter.post("/user/:userId/post", async (req, res) => {
+postRouter.post("/post", verifytoken, async (req, res) => {
+  const id = req.id;
+
   const { img, legend } = req.body;
-  const id = req.params;
+
+  if (!id) {
+    return res
+      .status(400)
+      .json({ message: "Não foi possivel fazer a postagem" });
+  }
 
   if (!img) {
     return res.status(400).json({ message: "poste uma imagem" });
@@ -17,22 +25,10 @@ postRouter.post("/user/:userId/post", async (req, res) => {
     return res.status(400).json({ message: "digite uma legenda" });
   }
 
-  if (!id) {
-    return res
-      .status(400)
-      .json({ message: "Não foi possivel fazer a postagem" });
-  }
-
-  const user = await User.findOne({ where: { user_id: id.userId } });
-
-  if (Boolean(user) === false) {
-    return res.status(400).json({ message: "usuario não encontrado" });
-  }
-
   const post = await Post.create({
     img_post: img,
     legend: legend,
-    userId: id.userId,
+    userId: id,
   });
 
   try {
@@ -47,33 +43,85 @@ postRouter.post("/user/:userId/post", async (req, res) => {
 // ------------------- ALL POSTS ------------------- //
 
 postRouter.get("/post", async (req, res) => {
-  const post = await Post.findAll({
+  const posts = await Post.findAll({
+    attributes: ["id", "img_post", "legend", "createdAt"],
+    order: [["createdAt", "DESC"]],
     include: [
       {
         model: User,
-        attributes: ["user_id", "avatar", "username"],
+        attributes: ["id", "avatar", "username"],
       },
       {
         model: Comment,
-        attributes: ["comment_id", "content", "createdAt"],
+        attributes: ["id", "content", "createdAt"],
         include: {
           model: User,
-          attributes: ["user_id", "avatar", "username", "createdAt"],
+          attributes: ["id", "avatar", "username", "createdAt"],
         },
         separate: true,
         order: [["createdAt", "DESC"]],
       },
     ],
-    attributes: ["post_id", "img_post", "legend", "createdAt"],
-    order: [["createdAt", "DESC"]],
   });
+  // const Id = req.id;
 
-  if (!post) {
+  // if (!Id) {
+  //   return res.status(401).json({
+  //     message: "acesso negado, token inválido, não retornou id",
+  //   });
+  // }
+  // // trazer quem eu estou seguindo, tentar usar ids dessa busca na busca dos posts
+  // const following = await User.findByPk(Id, {
+  //   attributes: ["id", "avatar", "username", "name"],
+  //   include: [
+  //     {
+  //       model: Following,
+  //       include: [
+  //         {
+  //           model: User,
+  //           attributes: ["id", "avatar", "username"],
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // });
+
+  // // trazer todos os posts do usuario e de quem ele segui
+
+  // const followingMap = following.Followings.map((user) => user.follow);
+
+  // await followingMap.push(Id);
+
+  // const posts = await Post.findAll({
+  //   where: {
+  //     userId: followingMap,
+  //   },
+  // attributes: ["id", "img_post", "legend", "createdAt"],
+  // order: [["createdAt", "DESC"]],
+  // include: [
+  //   {
+  //     model: User,
+  //     attributes: ["id", "avatar", "username"],
+  //   },
+  //   {
+  //     model: Comment,
+  //     attributes: ["id", "content", "createdAt"],
+  //     include: {
+  //       model: User,
+  //       attributes: ["id", "avatar", "username", "createdAt"],
+  //     },
+  //     separate: true,
+  //     order: [["createdAt", "DESC"]],
+  //   },
+  // ],
+  // });
+
+  if (!posts) {
     return res.status(400).json({ message: "postagens não encontradas" });
   }
 
   try {
-    return res.status(200).json(post);
+    return res.status(200).json(posts);
   } catch (error) {
     return res
       .status(500)
@@ -83,9 +131,9 @@ postRouter.get("/post", async (req, res) => {
 
 // ------------------- USER POSTS -------------------- //
 
-postRouter.get("/user/:userId/post", async (req, res) => {
-  const id = req.params;
-  const userId = id.userId;
+postRouter.get("/:userId/post", async (req, res) => {
+  const userId = req.params.userId;
+
   const posts = await Post.findAll({
     where: {
       userId: userId,
@@ -108,33 +156,36 @@ postRouter.get("/user/:userId/post", async (req, res) => {
 // ------------------- ONE POST -------------------- //
 
 postRouter.get("/post/:postId", async (req, res) => {
-  const id = req.params;
-  const postId = id.postId;
+  const postId = Number(req.params.postId);
 
-  if (!postId) {
+  if (!postId || postId === NaN || postId.lenght < 1) {
     return res.status(400).json({ message: "publicação não encontrada" });
   }
-  const posts = await Post.findByPk(postId, {
+
+  const posts = await Post.findAll({
+    where: {
+      id: postId,
+    },
     include: [
       {
         model: User,
-        attributes: ["user_id", "avatar", "username"],
+        attributes: ["id", "avatar", "username"],
       },
       {
         model: Comment,
-        attributes: ["comment_id", "content", "createdAt"],
+        attributes: ["id", "content", "createdAt"],
         include: {
           model: User,
-          attributes: ["user_id", "avatar", "username", "createdAt"],
+          attributes: ["id", "avatar", "username", "createdAt"],
         },
         separate: true,
         order: [["createdAt", "DESC"]],
       },
     ],
-    attributes: ["post_id", "img_post", "legend", "createdAt"],
+    attributes: ["id", "img_post", "legend", "createdAt"],
   });
 
-  if (!posts) {
+  if (Boolean(posts === false)) {
     return res.status(400).json({ message: "postagens não encontradas" });
   }
 
@@ -151,11 +202,9 @@ postRouter.get("/post/:postId", async (req, res) => {
 // -------------------- DELETE POST ------------------- //
 //                                                      //
 
-postRouter.delete("/user/:userId/post/:postId", async (req, res) => {
-  const id = req.params;
-
-  const userId = id.userId;
-  const postId = id.postId;
+postRouter.delete("/post/:postId", verifytoken, async (req, res) => {
+  const userId = req.id;
+  const postId = req.params.postId;
 
   if (!userId) {
     return res.status(400).json({ message: "usuario não encontrado" });
@@ -165,7 +214,7 @@ postRouter.delete("/user/:userId/post/:postId", async (req, res) => {
   }
 
   const user = await Post.destroy({
-    where: { userId: userId, post_id: postId },
+    where: { userId: userId, id: postId },
   });
 
   if (!user) {

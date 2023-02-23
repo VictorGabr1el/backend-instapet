@@ -4,7 +4,7 @@ import { Post } from "./Post.js";
 import { User } from "./User.js";
 
 export const Comment = sequelize.define("Comment", {
-  comment_id: {
+  id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
@@ -22,5 +22,5 @@ Post.hasMany(Comment, {
 
 Comment.belongsTo(User, {
   constraints: true,
-  foreignKey: "commentUserId",
+  foreignKey: "userId",
 });
