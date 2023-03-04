@@ -37,6 +37,7 @@ app.delete("/post/:postId", postRouter);
 app.post("/comment", commentRouter);
 app.get("/comment/:commentId", commentRouter);
 app.delete("/comment/:commentId", commentRouter);
+app.get("/comment", commentRouter);
 
 //
 

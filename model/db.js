@@ -1,10 +1,20 @@
 import { Sequelize } from "sequelize";
+import express from "express";
+import { env } from "process";
+// export const sequelize = new Sequelize(
+//   "oxpzogsz",
+//   "oxpzogsz",
+//   "RMr0YWWYUetdJO6qspKGmezwG5rmNFgA",
+//   {
+//     host: "motty.db.elephantsql.com",
+//     port: 5432,
+//     dialect: "postgres",
+//   }
+// );
 
-export const sequelize = new Sequelize("postgres", "postgres", "useradmin1", {
-  host: "35.247.246.79",
-  port: 5432,
-  dialect: "postgres",
-});
+export const sequelize = new Sequelize(
+  "postgres://socialdb:@*ndbfjd12@socialdb.postgres.database.azure.com:5432/postgres?sslmode=require"
+);
 
 try {
   await sequelize.authenticate();

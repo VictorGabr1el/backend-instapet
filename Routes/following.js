@@ -30,21 +30,21 @@ followingRouter.get("/following/:followId", async (req, res) => {
   const followId = req.params.followId;
 
   const followers = await Following.findAll({
-    where: {
-      follow: followId,
-    },
+    // where: {
+    //   follow: followId,
+    // },
   });
 
-  const followersId = followers.map((users) => users.userId);
+  // const followersId = followers.map((users) => users.userId);
 
-  const followersResult = await User.findAll({
-    where: {
-      id: followersId,
-    },
-  });
+  // const followersResult = await User.findAll({
+  //   where: {
+  //     id: followersId,
+  //   },
+  // });
 
   try {
-    return res.status(201).json(followersResult);
+    return res.status(201).json(followers);
   } catch (error) {
     return res
       .status(500)

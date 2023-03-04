@@ -111,4 +111,20 @@ commentRouter.delete("/comment/:commentId", verifytoken, async (req, res) => {
     });
 });
 
+commentRouter.get("/comment", async (req, res) => {
+  const commentarys = await Comment.findAll();
+
+  if (!commentarys) {
+    return res.status(500).json({ message: "desculpe, tente mais tarde" });
+  }
+
+  try {
+    return res.status(200).json(commentarys);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "ocorreu um erro, tente mais tarde", error });
+  }
+});
+
 export default commentRouter;

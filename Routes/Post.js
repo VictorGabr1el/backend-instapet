@@ -14,7 +14,7 @@ postRouter.post("/post", verifytoken, async (req, res) => {
   if (!id) {
     return res
       .status(400)
-      .json({ message: "Não foi possivel fazer a postagem" });
+      .json({ message: "Não foi possivel fazer a publicação" });
   }
 
   if (!img) {
@@ -32,7 +32,9 @@ postRouter.post("/post", verifytoken, async (req, res) => {
   });
 
   try {
-    return res.status(201).json({ message: "postagem criada", reaload: true });
+    return res
+      .status(201)
+      .json({ message: "publicação criada", reaload: true });
   } catch (error) {
     return res
       .status(500)
@@ -210,7 +212,7 @@ postRouter.delete("/post/:postId", verifytoken, async (req, res) => {
     return res.status(400).json({ message: "usuario não encontrado" });
   }
   if (!postId) {
-    return res.status(400).json({ message: "postagem não encontrada" });
+    return res.status(400).json({ message: "publicação não encontrada" });
   }
 
   const user = await Post.destroy({
@@ -222,7 +224,9 @@ postRouter.delete("/post/:postId", verifytoken, async (req, res) => {
   }
 
   try {
-    return res.status(200).json({ message: "postagem deletada" });
+    return res
+      .status(200)
+      .json({ message: "publicação deletada", reaload: "true" });
   } catch (error) {
     return res.status(500).json(error);
   }

@@ -221,12 +221,22 @@ userRouter.delete("/deleteaccount", verifytoken, async (req, res) => {
 // ----------------- FIND USERS ------------------
 
 userRouter.get("/users", async (req, res) => {
-  const user = await User.findAll();
+  const user = await User.findAll({
+    attributes: ["id", "name", "username", "avatar"],
+  });
+
+  const randomUsers = await User.sequelize.query(
+    'SELECT * FROM "Users" ORDER BY random() LIMIT 5;'
+  );
   if (!user) {
     return res.status(404).json({ message: "Usuarios não encontrados" });
   }
+  if (!randomUsers) {
+    return res.status(404).json({ message: "Usuarios não encontrados" });
+  }
+  console.log(randomUsers);
   try {
-    return res.status(200).json(user);
+    return res.status(200).json({ user, randomUsers });
   } catch (error) {
     return res.status(500).json(error);
   }
