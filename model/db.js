@@ -3,7 +3,9 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-export const sequelize = new Sequelize(`${process.env.HOST}`);
+export const sequelize = new Sequelize(
+  "postgres://socialdb:@*ndbfjd12@socialdb.postgres.database.azure.com:5432/postgres?sslmode=require"
+);
 
 try {
   await sequelize.authenticate();
