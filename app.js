@@ -3,7 +3,7 @@ import cors from "cors";
 import * as dotenv from "dotenv";
 
 import { userRouter, postRouter, commentRouter } from "./Routes/index.js";
-import { followingRouter } from "./Routes/Following.js";
+// import { followingRouter } from "./Routes/Following.js";
 
 dotenv.config();
 const app = express();
@@ -37,9 +37,9 @@ app.get("/comment", commentRouter);
 
 //
 
-app.post("/following/:followId", followingRouter);
-app.get("/following/:followId", followingRouter);
-app.delete("/following/:followId", followingRouter);
+// app.post("/following/:followId", followingRouter);
+// app.get("/following/:followId", followingRouter);
+// app.delete("/following/:followId", followingRouter);
 
 app.listen(
   process.env.PORT,
