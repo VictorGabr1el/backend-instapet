@@ -245,8 +245,6 @@ userRouter.get("/users", async (req, res) => {
 userRouter.get("/user/:userId", async (req, res) => {
   const userId = Number(req.params.userId);
 
-  console.log(userId);
-
   if (!userId) {
     return res.status(404).json({ message: "id não encontrado" });
   }

@@ -1,6 +1,7 @@
 import express from "express";
-import { User, Post, Comment } from "../model/index.js";
+import { User, Post, Comment, sequelize } from "../model/index.js";
 import verifytoken from "../middlewares/verifytoken.js";
+import { Op } from "sequelize";
 
 const postRouter = express.Router();
 
@@ -45,6 +46,13 @@ postRouter.post("/post", verifytoken, async (req, res) => {
 // ------------------- ALL POSTS ------------------- //
 
 postRouter.get("/post", async (req, res) => {
+  // const posts = await Post.destroy({
+  //   where: {
+  //     id: {
+  //       [Op.gt]: 10,
+  //     },
+  //   },
+  // });
   const posts = await Post.findAll({
     attributes: ["id", "img_post", "legend", "createdAt"],
     order: [["createdAt", "DESC"]],
@@ -55,6 +63,7 @@ postRouter.get("/post", async (req, res) => {
       },
       {
         model: Comment,
+        where: {},
         attributes: ["id", "content", "createdAt"],
         include: {
           model: User,
@@ -65,6 +74,13 @@ postRouter.get("/post", async (req, res) => {
       },
     ],
   });
+
+  // const post = await sequelize.query(
+  //   'SELECT "Posts"."id", "Posts"."img_post", "Posts"."legend", "Posts"."createdAt", "User"."id" AS "User.id", "User"."avatar" AS "User.avatar", "User"."username" AS "User.username" FROM "Posts" AS "Posts" LEFT OUTER JOIN "Users" AS "User" ON "Posts"."userId" = "User"."id" ORDER BY "Posts"."createdAt" DESC;',
+  //   'SELECT "Comment"."id", "Comment"."content", "Comment"."createdAt", "Comment"."postId", "User"."id" AS "User.id", "User"."avatar" AS "User.avatar", "User"."username" AS "User.username", "User"."createdAt" AS "User.createdAt" FROM "Comments" AS "Comment" LEFT OUTER JOIN "Users" AS "User" ON "Comment"."userId" = "User"."id" ORDER BY "Comment"."createdAt" DESC LIMIT 1;',
+  //   { type: sequelize.QueryTypes.SELECT }
+  // );
+
   // const Id = req.id;
 
   // if (!Id) {
@@ -117,6 +133,17 @@ postRouter.get("/post", async (req, res) => {
   //   },
   // ],
   // });
+
+  // const { id, img_post, legend, createdAt, 'User.id', 'User.avatar',
+  // 'User.username' } = post;
+
+  // const newModelPosts = {
+  //   id: id,
+  //   img_post: img_post,
+  //   legend: legend,
+  //   createdAt: createdAt,
+  //   comment: post,
+  // };
 
   if (!posts) {
     return res.status(400).json({ message: "postagens não encontradas" });
