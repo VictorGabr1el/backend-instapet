@@ -2,12 +2,8 @@ import express from "express";
 import cors from "cors";
 import * as dotenv from "dotenv";
 
-import {
-  userRouter,
-  postRouter,
-  commentRouter,
-  followingRouter,
-} from "./Routes/index.js";
+import { userRouter, postRouter, commentRouter } from "./Routes/index.js";
+import { followingRouter } from "./Routes/Following.js";
 
 dotenv.config();
 const app = express();
