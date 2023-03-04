@@ -1,8 +1,8 @@
 import express from "express";
-import { Following, Post, User } from "../model/index.js";
 import Jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import verifytoken from "../middlewares/verifytoken.js";
+import { Following, Post, User } from "../model/index.js";
 
 const userRouter = express.Router();
 

@@ -1,6 +1,6 @@
 import express from "express";
 import verifytoken from "../middlewares/verifytoken.js";
-import { User, Following } from "../model/index.js";
+import { Following } from "../model/index.js";
 
 const followingRouter = express.Router();
 

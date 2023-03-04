@@ -1,5 +1,5 @@
 import express from "express";
-import { sequelize, User, Post, Comment, Following } from "../model/index.js";
+import { User, Post, Comment } from "../model/index.js";
 import verifytoken from "../middlewares/verifytoken.js";
 
 const postRouter = express.Router();

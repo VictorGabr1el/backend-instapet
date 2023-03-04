@@ -1,6 +1,5 @@
 import { Sequelize } from "sequelize";
-import express from "express";
-import { env } from "process";
+
 // export const sequelize = new Sequelize(
 //   "oxpzogsz",
 //   "oxpzogsz",
