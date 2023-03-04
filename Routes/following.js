@@ -2,7 +2,7 @@ import express from "express";
 import verifytoken from "../middlewares/verifytoken.js";
 import { Following } from "../model/index.js";
 
-const followingRouter = express.Router();
+export const followingRouter = express.Router();
 
 //                                                      //
 // --------------------- CREATE ----------------------- //
@@ -87,4 +87,4 @@ followingRouter.delete(
   }
 );
 
-export default followingRouter;
+// export default followingRouter;
