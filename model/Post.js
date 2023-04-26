@@ -16,6 +16,7 @@ export const Post = sequelize.define("Posts", {
 
   legend: {
     type: DataTypes.STRING,
+    // type: DataTypes.STRING(1000),
   },
 });
 

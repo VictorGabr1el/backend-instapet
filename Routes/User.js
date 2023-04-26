@@ -1,8 +1,10 @@
-import express from "express";
+import express, { json } from "express";
 import Jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import verifytoken from "../middlewares/verifytoken.js";
-import { Following, Post, User } from "../model/index.js";
+import { Following, Post, sequelize, User } from "../model/index.js";
+import { Followers } from "../model/Followers.js";
+import { INTEGER, Op, where } from "sequelize";
 
 const userRouter = express.Router();
 
@@ -25,7 +27,7 @@ userRouter.post("/register", async (req, res) => {
     return res.status(400).json({ message: "digite um username" });
   }
 
-  if (username > 20) {
+  if (username.length > 20) {
     return res
       .status(400)
       .json({ message: "O username não pode ter mais de 20 caracteres" });
@@ -71,7 +73,7 @@ userRouter.post("/register", async (req, res) => {
   const salt = await bcrypt.genSalt(11);
   const hash = await bcrypt.hash(password, salt);
 
-  const user = User.build({
+  const user = await User.create({
     name,
     username,
     email,
@@ -80,8 +82,6 @@ userRouter.post("/register", async (req, res) => {
   });
 
   try {
-    await user.save();
-
     user.password = undefined;
 
     return res
@@ -94,12 +94,10 @@ userRouter.post("/register", async (req, res) => {
   }
 });
 
-//
-
 function gerartoken(params = {}) {
   const secret = process.env.SECRET;
   const token = Jwt.sign(params, secret, {
-    expiresIn: 86400,
+    expiresIn: 604800, // 3 days
   });
   return token;
 }
@@ -119,6 +117,16 @@ userRouter.post("/login", async (req, res) => {
 
   const user = await User.findOne({
     where: { email: email },
+    include: [
+      {
+        model: Following,
+        attributes: ["id", "followingId"],
+      },
+      {
+        model: Followers,
+        attributes: ["id", "followersId"],
+      },
+    ],
   });
 
   if (Boolean(user) === false) {
@@ -153,16 +161,15 @@ userRouter.get("/logado", verifytoken, async (req, res) => {
   }
 
   const user = await User.findByPk(Id, {
-    attributes: ["name", "avatar", "username", "id"],
+    attributes: ["id", "name", "avatar", "username"],
     include: [
       {
         model: Following,
-        include: [
-          {
-            model: User,
-            attributes: ["id", "avatar", "username"],
-          },
-        ],
+        attributes: ["id", "followingId"],
+      },
+      {
+        model: Followers,
+        attributes: ["id", "followersId"],
       },
     ],
   });
@@ -180,8 +187,9 @@ userRouter.get("/logado", verifytoken, async (req, res) => {
 
 userRouter.delete("/deleteaccount", verifytoken, async (req, res) => {
   const id = req.id;
-
   const { password } = req.body;
+
+  console.log(typeof password);
 
   if (!password) {
     res.status(400).json({ message: "digite sua senha" });
@@ -192,16 +200,29 @@ userRouter.delete("/deleteaccount", verifytoken, async (req, res) => {
       .json({ message: "não foi possivel deletar usuario, id não encontrado" });
   }
 
-  const user = await User.findOne({ where: { id: id, password: password } });
+  const user = await User.findOne({ where: { id: id } });
+
+  if (!user) {
+    return res.status(400).json({
+      message: "não foi possivel deletar sua conta, usuario não encontrado",
+    });
+  }
+
+  const checkPass = await bcrypt.compare(password, user.password);
+
+  if (!checkPass) {
+    return res.status(401).json({ message: "email ou senha incorretos" });
+  }
 
   if (Boolean(user) === false) {
     return res.status(400).json({ message: "você digitou a senha errada" });
   }
 
+  // utilizar o paranoid
+
   const deleteUser = await User.destroy({
     where: {
       id: id,
-      password: password,
     },
   });
 
@@ -212,35 +233,13 @@ userRouter.delete("/deleteaccount", verifytoken, async (req, res) => {
   }
 
   try {
-    return res.status(200).json({ message: "usuario deletado" });
+    return res.status(200).json({ message: "usuario deletado", reload: true });
   } catch (error) {
     return res.status(500).json(error);
   }
 });
 
-// ----------------- FIND USERS ------------------
-
-userRouter.get("/users", async (req, res) => {
-  const user = await User.findAll({
-    attributes: ["id", "name", "username", "avatar"],
-  });
-
-  const randomUsers = await User.sequelize.query(
-    'SELECT * FROM "Users" ORDER BY random() LIMIT 5;'
-  );
-  if (!user) {
-    return res.status(404).json({ message: "Usuarios não encontrados" });
-  }
-  if (!randomUsers) {
-    return res.status(404).json({ message: "Usuarios não encontrados" });
-  }
-  console.log(randomUsers);
-  try {
-    return res.status(200).json({ user, randomUsers });
-  } catch (error) {
-    return res.status(500).json(error);
-  }
-});
+//  ------------------ FIND ONE USER --------------------- //
 
 userRouter.get("/user/:userId", async (req, res) => {
   const userId = Number(req.params.userId);
@@ -250,7 +249,16 @@ userRouter.get("/user/:userId", async (req, res) => {
   }
 
   const user = await User.findByPk(userId, {
-    include: Post,
+    include: [
+      {
+        separate: true,
+        model: Post,
+        attributes: ["id", "img_post"],
+        order: [["createdAt", "DESC"]],
+      },
+      { model: Following, attributes: ["id", "followingId", "userId"] },
+      { model: Followers, attributes: ["id", "followersId", "userId"] },
+    ],
   });
 
   if (!user) {
@@ -261,6 +269,181 @@ userRouter.get("/user/:userId", async (req, res) => {
     return res.status(200).json(user);
   } catch (error) {
     return res.status(500).json(error);
+  }
+});
+
+// ----------------- FIND ALL USERS ------------------ //
+
+userRouter.get("/users", async (req, res) => {
+  const user = await User.findAll({
+    attributes: ["id", "name", "username", "avatar"],
+  });
+
+  if (!user) {
+    return res.status(404).json({ message: "Usuarios não encontrados" });
+  }
+
+  try {
+    return res.status(200).json(user);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+});
+
+// ----------------- FIND ALL USERS !!CONDITIONALLY!! ------------------ //
+
+userRouter.get("/users/:username", async (req, res) => {
+  const username = req.params.username.toLocaleLowerCase();
+
+  if (!username) {
+    return res
+      .status(404)
+      .json({ message: "parametro username não encontrado" });
+  }
+
+  const users = await User.findAll({
+    attributes: ["id", "name", "username", "avatar"],
+    where: {
+      [Op.or]: [
+        {
+          name: {
+            [Op.like]: `%${username}%`,
+          },
+        },
+        {
+          username: {
+            [Op.like]: `%${username}%`,
+          },
+        },
+      ],
+    },
+  });
+
+  if (!users) {
+    return res.status(404).json({ message: "Usuarios não encontrados" });
+  }
+
+  try {
+    return res.status(200).json(users);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+});
+
+// ----------------- FIND RANDOM USERS ------------------- //
+
+userRouter.get("/random/:userId", async (req, res) => {
+  const userId = Number(req.params.userId);
+
+  if (!userId) {
+    return res.status(404).json({ message: "id não encontrado" });
+  }
+
+  const userFollowing = await Following.findAll({
+    attributes: ["userId", "followingId"],
+    where: { userId: userId },
+  });
+
+  if (!userFollowing) {
+    return res.status(404).json({ message: " user!!! não encontrado" });
+  }
+
+  const FollowingsIDs = await new Promise((resolve) =>
+    resolve(userFollowing.map((u) => Number(u.followingId)))
+  );
+
+  FollowingsIDs.push(userId);
+
+  const randomUsers = await User.findAll({
+    where: {
+      id: {
+        [Op.notIn]: FollowingsIDs,
+      },
+    },
+  });
+
+  if (!randomUsers) {
+    return res.status(404).json({ message: "Usuarios não encontrados" });
+  }
+
+  try {
+    return res.status(200).json(randomUsers);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+});
+
+// ----------------- UPDATE USER ------------------- //
+
+userRouter.put("/user", verifytoken, async (req, res) => {
+  const id = req.id;
+  const { username, name, avatar, biograph } = req.body;
+
+  console.log(req.body);
+
+  if (name.length > 40) {
+    return res
+      .status(400)
+      .json({ message: "O nome não pode ter mais de 40 caracteres" });
+  }
+
+  if (username.length > 20) {
+    return res
+      .status(400)
+      .json({ message: "O username não pode ter mais de 20 caracteres" });
+  }
+
+  // if (biograph.length > 200) {
+  //   return res
+  //     .status(400)
+  //     .json({ message: "A biografia não pode ter mais de 200 caracteres" });
+  // }
+
+  if (!id) {
+    res
+      .status(400)
+      .json({ message: "não foi possivel deletar usuario, id não encontrado" });
+  }
+
+  const findUser = await User.findOne({ where: { id: id } });
+
+  // console.log(findUser);
+
+  if (!findUser) {
+    res.status(403).json({ message: "usuario não encontrado!" });
+  }
+  if (username !== "" && findUser.username !== username) {
+    const verifyUsername = await User.findOne({
+      where: { username: username },
+    });
+    if (verifyUsername) {
+      return res.status(400).json({ message: "username já está em uso" });
+    }
+  }
+  const data = {
+    username: username !== "" && username,
+    name: name !== "" && name,
+    // biograph: biograph && biograph,
+    avatar: avatar !== "" && avatar,
+  };
+
+  try {
+    const user = await User.update({ ...data }, { where: { id: id } });
+
+    if (!user) {
+      console.log(user);
+      return res
+        .status(400)
+        .json({ message: "não foi possivel atualizar seus dados" });
+    } else {
+      return res
+        .status(200)
+        .json({ message: "usuario atualizado com sucesso" });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "não foi possivel atualizar seus dados, tente mais tarde",
+    });
   }
 });
 

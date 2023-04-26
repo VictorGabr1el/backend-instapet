@@ -12,6 +12,7 @@ export const Comment = sequelize.define("Comment", {
 
   content: {
     type: DataTypes.STRING,
+    // type: DataTypes.STRING(100),
     allowNull: false,
   },
 });
