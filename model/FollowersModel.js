@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "./db.js";
-import { User } from "./User.js";
+import { UserModel } from "./UserModel.js";
 
-export const Followers = sequelize.define("Followers", {
+export const FollowersModel = sequelize.define("Followers", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -10,10 +10,10 @@ export const Followers = sequelize.define("Followers", {
   },
 });
 
-Followers.belongsTo(User, {
+FollowersModel.belongsTo(UserModel, {
   foreignKey: "followersId",
 });
 
-User.hasMany(Followers, {
+UserModel.hasMany(FollowersModel, {
   foreignKey: "userId",
 });

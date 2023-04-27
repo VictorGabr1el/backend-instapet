@@ -1,8 +1,8 @@
-import userRouter from "./User.js";
-import postRouter from "./Post.js";
-import commentRouter from "./Comment.js";
-import followingRouter from "./Following.js";
-import followersRouter from "./Followers.js";
+import userRouter from "./UserController.js";
+import postRouter from "./PostConctroller.js";
+import commentRouter from "./CommentController.js";
+import followingRouter from "./FollowingController.js";
+import followersRouter from "./FollowersController.js";
 
 export {
   userRouter,

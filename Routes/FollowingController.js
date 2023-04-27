@@ -1,7 +1,6 @@
 import express from "express";
 import verifytoken from "../middlewares/verifytoken.js";
-import { Followers } from "../model/Followers.js";
-import { Following, User } from "../model/index.js";
+import { UserModel, FollowingModel, FollowersModel } from "../model/index.js";
 
 const followingRouter = express.Router();
 
@@ -20,11 +19,11 @@ followingRouter.post("/follow/:followId", verifytoken, async (req, res) => {
     return res.status(403).json({ message: "followId não encontrado" });
   }
 
-  const follow = await Following.create({
+  const follow = await FollowingModel.create({
     userId: userId,
     followingId: followId,
   }).then(() => {
-    Followers.create({
+    FollowersModel.create({
       followersId: userId,
       userId: followId,
     });
@@ -47,12 +46,12 @@ followingRouter.get("/user/:userId/following/:followId", async (req, res) => {
   const userId = req.params.userId;
   const followId = req.params.followId;
 
-  const following = await Following.findOne({
+  const following = await FollowingModel.findOne({
     where: {
       followingId: followId,
       userId: userId,
     },
-    include: { model: User, attributes: ["name", "email", "username"] },
+    include: { model: UserModel, attributes: ["name", "email", "username"] },
   });
 
   try {
@@ -71,10 +70,10 @@ followingRouter.get("/user/:userId/following/:followId", async (req, res) => {
 followingRouter.get("/user/:userId/following", async (req, res) => {
   const userId = req.params.userId;
 
-  const following = await Following.findAll({
+  const following = await FollowingModel.findAll({
     where: { userId: userId },
     include: {
-      model: User,
+      model: UserModel,
       attributes: ["id", "name", "email", "username", "avatar"],
     },
   });
@@ -111,7 +110,7 @@ followingRouter.delete(
       });
     }
 
-    const verifyRegister = await Following.findOne({
+    const verifyRegister = await FollowingModel.findOne({
       where: {
         userId: userId,
         followingId: followId,
@@ -122,14 +121,14 @@ followingRouter.delete(
       return res.status(403).json({ message: "você não segue este usuário" });
     }
 
-    await Following.destroy({
+    await FollowingModel.destroy({
       where: {
         userId: userId,
         followingId: followId,
       },
     });
 
-    await Followers.destroy({
+    await FollowersModel.destroy({
       where: {
         userId: followId,
         followersId: userId,

@@ -1,5 +1,10 @@
 import express from "express";
-import { User, Post, Comment, sequelize } from "../model/index.js";
+import {
+  UserModel,
+  PostModel,
+  CommentModel,
+  sequelize,
+} from "../model/index.js";
 import verifytoken from "../middlewares/verifytoken.js";
 
 const postRouter = express.Router();
@@ -22,7 +27,7 @@ postRouter.post("/post", verifytoken, async (req, res) => {
       .json({ messge: "A legenda da publicação é muito grande" });
   }
 
-  const post = await Post.create({
+  const post = await PostModel.create({
     img_post: img && img,
     legend: legend && legend,
     userId: id,
@@ -42,19 +47,19 @@ postRouter.post("/post", verifytoken, async (req, res) => {
 // ------------------- ALL POSTS ------------------- //
 
 postRouter.get("/post", async (req, res) => {
-  const posts = await Post.findAll({
+  const posts = await PostModel.findAll({
     attributes: ["id", "img_post", "legend", "createdAt"],
     order: [["createdAt", "DESC"]],
     include: [
       {
-        model: User,
+        model: UserModel,
         attributes: ["id", "avatar", "username"],
       },
       {
-        model: Comment,
+        model: CommentModel,
         attributes: ["id", "content", "createdAt"],
         include: {
-          model: User,
+          model: UserModel,
           attributes: ["id", "avatar", "username"],
         },
         separate: true,
@@ -81,7 +86,7 @@ postRouter.get("/post", async (req, res) => {
 postRouter.get("/:userId/post", async (req, res) => {
   const userId = req.params.userId;
 
-  const posts = await Post.findAll({
+  const posts = await PostModel.findAll({
     where: {
       userId: userId,
     },
@@ -109,20 +114,20 @@ postRouter.get("/post/:postId", async (req, res) => {
     return res.status(400).json({ message: "publicação não encontrada" });
   }
 
-  const post = await Post.findOne({
+  const post = await PostModel.findOne({
     where: {
       id: postId,
     },
     include: [
       {
-        model: User,
+        model: UserModel,
         attributes: ["id", "avatar", "username"],
       },
       {
-        model: Comment,
+        model: CommentModel,
         attributes: ["id", "content", "createdAt"],
         include: {
-          model: User,
+          model: UserModel,
           attributes: ["id", "avatar", "username"],
         },
         separate: true,
@@ -170,13 +175,15 @@ postRouter.put("/post/:postId", verifytoken, async (req, res) => {
       .json({ messge: "A legenda da publicação é muito grande" });
   }
 
-  const verify = await Post.findOne({ where: { id: postId, userId: userId } });
+  const verify = await PostModel.findOne({
+    where: { id: postId, userId: userId },
+  });
 
   if (!verify) {
     return res.status(400).json({ message: "você não fez essa publicação" });
   }
 
-  const post = await Post.update(
+  const post = await PostModel.update(
     {
       img_post: ImgUrl && ImgUrl,
       legend: legend && legend,
@@ -217,13 +224,15 @@ postRouter.delete("/post/:postId", verifytoken, async (req, res) => {
     return res.status(400).json({ message: "publicação não encontrada" });
   }
 
-  const verify = await Post.findOne({ where: { id: postId, userId: userId } });
+  const verify = await PostModel.findOne({
+    where: { id: postId, userId: userId },
+  });
 
   if (!verify) {
     return res.status(400).json({ message: "você não fez essa publicação" });
   }
 
-  const user = await Post.destroy({
+  const user = await PostModel.destroy({
     where: { userId: userId, id: postId },
   });
 

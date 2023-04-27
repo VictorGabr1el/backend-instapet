@@ -1,6 +1,5 @@
 import express from "express";
-import verifytoken from "../middlewares/verifytoken.js";
-import { User, Followers } from "../model/index.js";
+import { UserModel, FollowersModel } from "../model/index.js";
 
 const followersRouter = express.Router();
 
@@ -11,10 +10,10 @@ followersRouter.get("/user/:userId/followers", async (req, res) => {
     return res.status(403).json({ message: "seu ID não foi encontrado" });
   }
 
-  const followers = await Followers.findAll({
+  const followers = await FollowersModel.findAll({
     where: { userId: userId },
     include: {
-      model: User,
+      model: UserModel,
       attributes: ["id", "name", "email", "username", "avatar"],
     },
   });

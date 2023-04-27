@@ -1,9 +1,9 @@
 import { sequelize } from "./db.js";
-import { User } from "./User.js";
-import { Post } from "./Post.js";
-import { Comment } from "./Comment.js";
-import { Following } from "./Following.js";
-import { Followers } from "./Followers.js";
+import { UserModel } from "./UserModel.js";
+import { PostModel } from "./PostModel.js";
+import { CommentModel } from "./CommentModel.js";
+import { FollowingModel } from "./FollowingModel.js";
+import { FollowersModel } from "./FollowersModel.js";
 
 // (async () => {
 //   await sequelize
@@ -14,4 +14,11 @@ import { Followers } from "./Followers.js";
 //     });
 // })();
 
-export { sequelize, User, Post, Comment, Following, Followers };
+export {
+  sequelize,
+  UserModel,
+  PostModel,
+  CommentModel,
+  FollowingModel,
+  FollowersModel,
+};

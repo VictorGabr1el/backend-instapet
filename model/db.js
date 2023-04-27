@@ -3,18 +3,17 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-// export const sequelize = new Sequelize(process.env.HOST);
+const host = process.env.DB_HOST;
+const database = process.env.DB_DATABASE;
+const user = process.env.DB_USER;
+const pass = process.env.DB_PASS;
+const port = process.env.DB_PORT;
 
-export const sequelize = new Sequelize(
-  "oxpzogsz",
-  "oxpzogsz",
-  "RMr0YWWYUetdJO6qspKGmezwG5rmNFgA",
-  {
-    host: "motty.db.elephantsql.com",
-    port: 5432,
-    dialect: "postgres",
-  }
-);
+export const sequelize = new Sequelize(database, user, pass, {
+  host: host,
+  port: port,
+  dialect: "postgres",
+});
 
 try {
   await sequelize.authenticate();

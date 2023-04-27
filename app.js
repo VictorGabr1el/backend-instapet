@@ -55,6 +55,6 @@ app.delete("/following/:followId", followingRouter);
 app.get("/user/:userId/followers", followersRouter);
 
 app.listen(
-  process.env.PORT,
-  console.log(`server rodando na porta ${process.env.PORT}`)
+  process.env.SERVER_PORT,
+  console.log(`server rodando na porta ${process.env.SERVER_PORT}`)
 );

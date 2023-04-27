@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "./db.js";
-import { User } from "./User.js";
+import { UserModel } from "./UserModel.js";
 
-export const Post = sequelize.define("Posts", {
+export const PostModel = sequelize.define("Posts", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -11,20 +11,20 @@ export const Post = sequelize.define("Posts", {
 
   img_post: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
 
   legend: {
-    type: DataTypes.STRING,
-    // type: DataTypes.STRING(1000),
+    type: DataTypes.STRING(800),
+    allowNull: true,
   },
 });
 
-Post.belongsTo(User, {
+PostModel.belongsTo(UserModel, {
   constraints: true,
   foreignKey: "userId",
 });
 
-User.hasMany(Post, {
+UserModel.hasMany(PostModel, {
   foreignKey: "userId",
 });

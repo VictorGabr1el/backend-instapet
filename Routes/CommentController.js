@@ -1,5 +1,5 @@
 import express from "express";
-import { Comment, User } from "../model/index.js";
+import { UserModel, CommentModel } from "../model/index.js";
 import verifytoken from "../middlewares/verifytoken.js";
 
 const commentRouter = express.Router();
@@ -28,13 +28,13 @@ commentRouter.post("/comment", verifytoken, async (req, res) => {
     });
   }
 
-  const user = await User.findOne({ where: { id: userId } });
+  const user = await UserModel.findOne({ where: { id: userId } });
 
   if (Boolean(user) === false) {
     return res.status(400).json({ message: "usuario não encontrado" });
   }
 
-  const comment = Comment.build({
+  const comment = CommentModel.build({
     content: content,
     userId: userId,
     postId: postId,
@@ -63,7 +63,7 @@ commentRouter.get("/comment/:commentId", async (req, res) => {
     return res.status(400).json({ message: "comentario não encontrada" });
   }
 
-  const findComment = await Comment.findByPk(commentId);
+  const findComment = await CommentModel.findByPk(commentId);
 
   if (!findComment) {
     return res.status(400).json({ message: "postagens não encontradas" });
@@ -97,7 +97,7 @@ commentRouter.delete("/comment/:commentId", verifytoken, async (req, res) => {
     });
   }
 
-  Comment.destroy({
+  CommentModel.destroy({
     where: {
       userId: userId,
       id: commentId,
@@ -112,7 +112,7 @@ commentRouter.delete("/comment/:commentId", verifytoken, async (req, res) => {
 });
 
 commentRouter.get("/comment", async (req, res) => {
-  const commentarys = await Comment.findAll();
+  const commentarys = await CommentModel.findAll();
 
   if (!commentarys) {
     return res.status(500).json({ message: "desculpe, tente mais tarde" });

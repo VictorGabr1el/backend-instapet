@@ -1,10 +1,15 @@
-import express, { json } from "express";
+import express from "express";
 import Jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import verifytoken from "../middlewares/verifytoken.js";
-import { Following, Post, sequelize, User } from "../model/index.js";
-import { Followers } from "../model/Followers.js";
-import { INTEGER, Op, where } from "sequelize";
+import {
+  UserModel,
+  PostModel,
+  FollowingModel,
+  FollowersModel,
+  sequelize,
+} from "../model/index.js";
+import { Op } from "sequelize";
 
 const userRouter = express.Router();
 
@@ -54,7 +59,7 @@ userRouter.post("/register", async (req, res) => {
     return res.status(400).json({ message: "as senhas não estão iguais" });
   }
 
-  const verifyEmail = await User.findOne({
+  const verifyEmail = await UserModel.findOne({
     where: { email: email },
   });
 
@@ -62,7 +67,7 @@ userRouter.post("/register", async (req, res) => {
     return res.status(400).json({ message: "esse email já está em uso" });
   }
 
-  const verifyUsername = await User.findOne({
+  const verifyUsername = await UserModel.findOne({
     where: { username: username },
   });
 
@@ -73,7 +78,7 @@ userRouter.post("/register", async (req, res) => {
   const salt = await bcrypt.genSalt(11);
   const hash = await bcrypt.hash(password, salt);
 
-  const user = await User.create({
+  const user = await UserModel.create({
     name,
     username,
     email,
@@ -115,15 +120,15 @@ userRouter.post("/login", async (req, res) => {
     return res.status(400).json({ message: "digite uma senha" });
   }
 
-  const user = await User.findOne({
+  const user = await UserModel.findOne({
     where: { email: email },
     include: [
       {
-        model: Following,
+        model: FollowingModel,
         attributes: ["id", "followingId"],
       },
       {
-        model: Followers,
+        model: FollowersModel,
         attributes: ["id", "followersId"],
       },
     ],
@@ -160,15 +165,15 @@ userRouter.get("/logado", verifytoken, async (req, res) => {
     });
   }
 
-  const user = await User.findByPk(Id, {
+  const user = await UserModel.findByPk(Id, {
     attributes: ["id", "name", "avatar", "username"],
     include: [
       {
-        model: Following,
+        model: FollowingModel,
         attributes: ["id", "followingId"],
       },
       {
-        model: Followers,
+        model: FollowersModel,
         attributes: ["id", "followersId"],
       },
     ],
@@ -200,7 +205,7 @@ userRouter.delete("/deleteaccount", verifytoken, async (req, res) => {
       .json({ message: "não foi possivel deletar usuario, id não encontrado" });
   }
 
-  const user = await User.findOne({ where: { id: id } });
+  const user = await UserModel.findOne({ where: { id: id } });
 
   if (!user) {
     return res.status(400).json({
@@ -220,7 +225,7 @@ userRouter.delete("/deleteaccount", verifytoken, async (req, res) => {
 
   // utilizar o paranoid
 
-  const deleteUser = await User.destroy({
+  const deleteUser = await UserModel.destroy({
     where: {
       id: id,
     },
@@ -248,16 +253,16 @@ userRouter.get("/user/:userId", async (req, res) => {
     return res.status(404).json({ message: "id não encontrado" });
   }
 
-  const user = await User.findByPk(userId, {
+  const user = await UserModel.findByPk(userId, {
     include: [
       {
         separate: true,
-        model: Post,
+        model: PostModel,
         attributes: ["id", "img_post"],
         order: [["createdAt", "DESC"]],
       },
-      { model: Following, attributes: ["id", "followingId", "userId"] },
-      { model: Followers, attributes: ["id", "followersId", "userId"] },
+      { model: FollowingModel, attributes: ["id", "followingId", "userId"] },
+      { model: FollowersModel, attributes: ["id", "followersId", "userId"] },
     ],
   });
 
@@ -275,7 +280,7 @@ userRouter.get("/user/:userId", async (req, res) => {
 // ----------------- FIND ALL USERS ------------------ //
 
 userRouter.get("/users", async (req, res) => {
-  const user = await User.findAll({
+  const user = await UserModel.findAll({
     attributes: ["id", "name", "username", "avatar"],
   });
 
@@ -301,7 +306,7 @@ userRouter.get("/users/:username", async (req, res) => {
       .json({ message: "parametro username não encontrado" });
   }
 
-  const users = await User.findAll({
+  const users = await UserModel.findAll({
     attributes: ["id", "name", "username", "avatar"],
     where: {
       [Op.or]: [
@@ -354,7 +359,7 @@ userRouter.get("/random/:userId", async (req, res) => {
 
   FollowingsIDs.push(userId);
 
-  const randomUsers = await User.findAll({
+  const randomUsers = await UserModel.findAll({
     where: {
       id: {
         [Op.notIn]: FollowingsIDs,
@@ -405,7 +410,7 @@ userRouter.put("/user", verifytoken, async (req, res) => {
       .json({ message: "não foi possivel deletar usuario, id não encontrado" });
   }
 
-  const findUser = await User.findOne({ where: { id: id } });
+  const findUser = await UserModel.findOne({ where: { id: id } });
 
   // console.log(findUser);
 
@@ -413,7 +418,7 @@ userRouter.put("/user", verifytoken, async (req, res) => {
     res.status(403).json({ message: "usuario não encontrado!" });
   }
   if (username !== "" && findUser.username !== username) {
-    const verifyUsername = await User.findOne({
+    const verifyUsername = await UserModel.findOne({
       where: { username: username },
     });
     if (verifyUsername) {
@@ -428,7 +433,7 @@ userRouter.put("/user", verifytoken, async (req, res) => {
   };
 
   try {
-    const user = await User.update({ ...data }, { where: { id: id } });
+    const user = await UserModel.update({ ...data }, { where: { id: id } });
 
     if (!user) {
       console.log(user);

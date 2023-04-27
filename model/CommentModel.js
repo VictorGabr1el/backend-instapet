@@ -1,9 +1,9 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "./db.js";
-import { Post } from "./Post.js";
-import { User } from "./User.js";
+import { PostModel } from "./PostModel.js";
+import { UserModel } from "./UserModel.js";
 
-export const Comment = sequelize.define("Comment", {
+export const CommentModel = sequelize.define("Comment", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -11,17 +11,16 @@ export const Comment = sequelize.define("Comment", {
   },
 
   content: {
-    type: DataTypes.STRING,
-    // type: DataTypes.STRING(100),
+    type: DataTypes.STRING(100),
     allowNull: false,
   },
 });
 
-Post.hasMany(Comment, {
+PostModel.hasMany(CommentModel, {
   foreignKey: "postId",
 });
 
-Comment.belongsTo(User, {
+CommentModel.belongsTo(UserModel, {
   constraints: true,
   foreignKey: "userId",
 });
