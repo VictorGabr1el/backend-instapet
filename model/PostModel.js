@@ -18,6 +18,11 @@ export const PostModel = sequelize.define("Posts", {
     type: DataTypes.STRING(800),
     allowNull: true,
   },
+  likes: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: 0,
+  },
 });
 
 PostModel.belongsTo(UserModel, {

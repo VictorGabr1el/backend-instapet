@@ -1,10 +1,5 @@
 import express from "express";
-import {
-  UserModel,
-  PostModel,
-  CommentModel,
-  sequelize,
-} from "../model/index.js";
+import { UserModel, PostModel, CommentModel } from "../model/index.js";
 import verifytoken from "../middlewares/verifytoken.js";
 
 const postRouter = express.Router();
@@ -21,15 +16,15 @@ postRouter.post("/post", verifytoken, async (req, res) => {
       .json({ message: "Não foi possivel fazer a publicação" });
   }
 
-  if (legend.length > 500) {
+  if (legend.length > 800) {
     return res
       .status(400)
       .json({ messge: "A legenda da publicação é muito grande" });
   }
 
   const post = await PostModel.create({
-    img_post: img && img,
-    legend: legend && legend,
+    img_post: img !== "" ? img : "",
+    legend: legend !== "" ? legend : "",
     userId: id,
   });
 

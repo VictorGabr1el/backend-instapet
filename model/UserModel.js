@@ -25,7 +25,7 @@ export const UserModel = sequelize.define("User", {
     unique: true,
   },
   password: {
-    type: DataTypes.STRING(30),
+    type: DataTypes.STRING,
     allowNull: false,
   },
   avatar: {

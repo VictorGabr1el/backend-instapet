@@ -13,19 +13,26 @@ commentRouter.post("/comment", verifytoken, async (req, res) => {
 
   const userId = req.id;
 
-  if (!content) {
-    return res.status(400).json({ message: "caixa de comentário está vazia" });
-  }
-
   if (!userId) {
     return res.status(400).json({
       message: "Não foi possivel fazer o comentário, usuario não identificado",
     });
   }
+
   if (!postId) {
     return res.status(400).json({
       message: "Não foi possivel fazer o comentário, postagem não encontrada",
     });
+  }
+
+  if (!content) {
+    return res.status(400).json({ message: "caixa de comentário está vazia" });
+  }
+
+  if (content.length > 100) {
+    return res
+      .status(400)
+      .json({ message: "O comentário não pode ter mais de 100 caracteres" });
   }
 
   const user = await UserModel.findOne({ where: { id: userId } });

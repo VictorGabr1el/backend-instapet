@@ -7,7 +7,6 @@ import {
   PostModel,
   FollowingModel,
   FollowersModel,
-  sequelize,
 } from "../model/index.js";
 import { Op } from "sequelize";
 
@@ -121,6 +120,7 @@ userRouter.post("/login", async (req, res) => {
   }
 
   const user = await UserModel.findOne({
+    attributes: ["id", "name", "username", "avatar", "biograph"],
     where: { email: email },
     include: [
       {
@@ -166,7 +166,7 @@ userRouter.get("/logado", verifytoken, async (req, res) => {
   }
 
   const user = await UserModel.findByPk(Id, {
-    attributes: ["id", "name", "avatar", "username"],
+    attributes: ["id", "name", "username", "avatar", "biograph"],
     include: [
       {
         model: FollowingModel,
@@ -223,8 +223,6 @@ userRouter.delete("/deleteaccount", verifytoken, async (req, res) => {
     return res.status(400).json({ message: "você digitou a senha errada" });
   }
 
-  // utilizar o paranoid
-
   const deleteUser = await UserModel.destroy({
     where: {
       id: id,
@@ -254,6 +252,7 @@ userRouter.get("/user/:userId", async (req, res) => {
   }
 
   const user = await UserModel.findByPk(userId, {
+    attributes: ["id", "name", "username", "avatar", "biograph"],
     include: [
       {
         separate: true,
@@ -344,7 +343,7 @@ userRouter.get("/random/:userId", async (req, res) => {
     return res.status(404).json({ message: "id não encontrado" });
   }
 
-  const userFollowing = await Following.findAll({
+  const userFollowing = await FollowingModel.findAll({
     attributes: ["userId", "followingId"],
     where: { userId: userId },
   });
@@ -365,6 +364,7 @@ userRouter.get("/random/:userId", async (req, res) => {
         [Op.notIn]: FollowingsIDs,
       },
     },
+    limit: 7,
   });
 
   if (!randomUsers) {
@@ -386,6 +386,12 @@ userRouter.put("/user", verifytoken, async (req, res) => {
 
   console.log(req.body);
 
+  if (!id) {
+    res
+      .status(400)
+      .json({ message: "não foi possivel deletar usuario, id não encontrado" });
+  }
+
   if (name.length > 40) {
     return res
       .status(400)
@@ -398,21 +404,15 @@ userRouter.put("/user", verifytoken, async (req, res) => {
       .json({ message: "O username não pode ter mais de 20 caracteres" });
   }
 
-  // if (biograph.length > 200) {
-  //   return res
-  //     .status(400)
-  //     .json({ message: "A biografia não pode ter mais de 200 caracteres" });
-  // }
-
-  if (!id) {
-    res
+  if (biograph.length > 200) {
+    return res
       .status(400)
-      .json({ message: "não foi possivel deletar usuario, id não encontrado" });
+      .json({ message: "A biografia não pode ter mais de 200 caracteres" });
   }
 
   const findUser = await UserModel.findOne({ where: { id: id } });
 
-  // console.log(findUser);
+  console.log(findUser.username);
 
   if (!findUser) {
     res.status(403).json({ message: "usuario não encontrado!" });
@@ -421,15 +421,16 @@ userRouter.put("/user", verifytoken, async (req, res) => {
     const verifyUsername = await UserModel.findOne({
       where: { username: username },
     });
+
     if (verifyUsername) {
       return res.status(400).json({ message: "username já está em uso" });
     }
   }
   const data = {
-    username: username !== "" && username,
-    name: name !== "" && name,
-    // biograph: biograph && biograph,
-    avatar: avatar !== "" && avatar,
+    username: username !== "" ? username : "",
+    name: name !== "" ? name : "",
+    biograph: biograph ? biograph : "",
+    avatar: avatar !== "" ? avatar : "",
   };
 
   try {
