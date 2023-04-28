@@ -12,11 +12,13 @@ export const PostModel = sequelize.define("Posts", {
   img_post: {
     type: DataTypes.STRING,
     allowNull: true,
+    defaultValue: "",
   },
 
   legend: {
     type: DataTypes.STRING(800),
     allowNull: true,
+    defaultValue: "",
   },
   likes: {
     type: DataTypes.INTEGER,

@@ -13,6 +13,7 @@ export const CommentModel = sequelize.define("Comment", {
   content: {
     type: DataTypes.STRING(100),
     allowNull: false,
+    defaultValue: "",
   },
 });
 

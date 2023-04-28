@@ -54,7 +54,7 @@ userRouter.post("/register", async (req, res) => {
     return res.status(400).json({ message: "confirme sua senha" });
   }
 
-  if (!confirmPass) {
+  if (confirmPass !== password) {
     return res.status(400).json({ message: "as senhas não estão iguais" });
   }
 
@@ -111,6 +111,8 @@ function gerartoken(params = {}) {
 userRouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
+  console.log(password, email);
+
   if (!email) {
     return res.status(400).json({ message: "digite seu email" });
   }
@@ -120,7 +122,7 @@ userRouter.post("/login", async (req, res) => {
   }
 
   const user = await UserModel.findOne({
-    attributes: ["id", "name", "username", "avatar", "biograph"],
+    attributes: ["id", "name", "username", "avatar", "biograph", "password"],
     where: { email: email },
     include: [
       {

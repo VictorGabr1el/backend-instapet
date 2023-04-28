@@ -31,10 +31,12 @@ export const UserModel = sequelize.define("User", {
   avatar: {
     type: DataTypes.STRING,
     allowNull: false,
+    defaultValue: "",
   },
 
   biograph: {
     type: DataTypes.STRING(200),
     allowNull: true,
+    defaultValue: "",
   },
 });
