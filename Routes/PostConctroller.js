@@ -162,7 +162,7 @@ postRouter.put("/post/:postId", verifytoken, async (req, res) => {
     return res.status(400).json({ message: "publicação não encontrada" });
   }
 
-  if (legend.length > 500) {
+  if (legend.length > 800) {
     return res
       .status(400)
       .json({ messge: "A legenda da publicação é muito grande" });
@@ -178,7 +178,7 @@ postRouter.put("/post/:postId", verifytoken, async (req, res) => {
 
   const post = await PostModel.update(
     {
-      img_post: ImgUrl.length > 0 ? legend : "",
+      img_post: img.length > 0 ? img : "",
       legend: legend.length > 0 ? legend : "",
     },
     {
