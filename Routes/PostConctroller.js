@@ -153,9 +153,7 @@ postRouter.put("/post/:postId", verifytoken, async (req, res) => {
   const postId = req.params.postId;
   const userId = req.id;
 
-  const { ImgUrl, legend } = req.body;
-
-  console.log(ImgUrl, legend);
+  const { img, legend } = req.body;
 
   if (!userId) {
     return res.status(400).json({ message: "usuario não encontrado" });
@@ -180,8 +178,8 @@ postRouter.put("/post/:postId", verifytoken, async (req, res) => {
 
   const post = await PostModel.update(
     {
-      img_post: ImgUrl && ImgUrl,
-      legend: legend && legend,
+      img_post: ImgUrl.length > 0 ? legend : "",
+      legend: legend.length > 0 ? legend : "",
     },
     {
       where: { userId: userId, id: postId },
@@ -189,7 +187,6 @@ postRouter.put("/post/:postId", verifytoken, async (req, res) => {
   );
 
   if (!post) {
-    console.log(post);
     return res
       .status(400)
       .json({ message: "não foi possivel atulizar sua publicação" });

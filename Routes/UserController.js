@@ -111,8 +111,6 @@ function gerartoken(params = {}) {
 userRouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  console.log(password, email);
-
   if (!email) {
     return res.status(400).json({ message: "digite seu email" });
   }
@@ -195,8 +193,6 @@ userRouter.get("/logado", verifytoken, async (req, res) => {
 userRouter.delete("/deleteaccount", verifytoken, async (req, res) => {
   const id = req.id;
   const { password } = req.body;
-
-  console.log(typeof password);
 
   if (!password) {
     res.status(400).json({ message: "digite sua senha" });
@@ -386,8 +382,6 @@ userRouter.put("/user", verifytoken, async (req, res) => {
   const id = req.id;
   const { username, name, avatar, biograph } = req.body;
 
-  console.log(req.body);
-
   if (!id) {
     res
       .status(400)
@@ -414,8 +408,6 @@ userRouter.put("/user", verifytoken, async (req, res) => {
 
   const findUser = await UserModel.findOne({ where: { id: id } });
 
-  console.log(findUser.username);
-
   if (!findUser) {
     res.status(403).json({ message: "usuario não encontrado!" });
   }
@@ -439,7 +431,6 @@ userRouter.put("/user", verifytoken, async (req, res) => {
     const user = await UserModel.update({ ...data }, { where: { id: id } });
 
     if (!user) {
-      console.log(user);
       return res
         .status(400)
         .json({ message: "não foi possivel atualizar seus dados" });
