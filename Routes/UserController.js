@@ -17,6 +17,9 @@ const userRouter = express.Router();
 userRouter.post("/register", async (req, res) => {
   const { name, username, avatar, email, password, confirmPass } = req.body;
 
+  const Username = String(username).toLocaleLowerCase();
+  const Email = String(email).toLocaleLowerCase();
+
   if (!name) {
     return res.status(400).json({ message: "digite seu nome completo" });
   }
@@ -26,8 +29,6 @@ userRouter.post("/register", async (req, res) => {
       .status(400)
       .json({ message: "O nome não pode ter mais de 40 caracteres" });
   }
-
-  const Username = String(username).toLocaleLowerCase();
 
   if (!Username) {
     return res.status(400).json({ message: "digite um username" });
@@ -39,7 +40,7 @@ userRouter.post("/register", async (req, res) => {
       .json({ message: "O username não pode ter mais de 20 caracteres" });
   }
 
-  if (!email) {
+  if (!Email) {
     return res.status(400).json({ message: "digite seu email" });
   }
   if (!avatar) {
@@ -61,7 +62,7 @@ userRouter.post("/register", async (req, res) => {
   }
 
   const verifyEmail = await UserModel.findOne({
-    where: { email: email },
+    where: { email: Email },
   });
 
   if (Boolean(verifyEmail) === true) {
@@ -82,7 +83,7 @@ userRouter.post("/register", async (req, res) => {
   const user = await UserModel.create({
     name,
     username: Username,
-    email,
+    email: Email,
     password: hash,
     avatar,
   });
@@ -113,7 +114,9 @@ function gerartoken(params = {}) {
 userRouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email) {
+  const Email = String(email).toLocaleLowerCase();
+
+  if (!Email) {
     return res.status(400).json({ message: "digite seu email" });
   }
 
@@ -123,7 +126,7 @@ userRouter.post("/login", async (req, res) => {
 
   const user = await UserModel.findOne({
     attributes: ["id", "name", "username", "avatar", "biograph", "password"],
-    where: { email: email },
+    where: { email: Email },
     include: [
       {
         model: FollowingModel,
