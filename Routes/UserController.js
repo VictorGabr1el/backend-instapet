@@ -27,11 +27,13 @@ userRouter.post("/register", async (req, res) => {
       .json({ message: "O nome não pode ter mais de 40 caracteres" });
   }
 
-  if (!username) {
+  const Username = String(username).toLocaleLowerCase();
+
+  if (!Username) {
     return res.status(400).json({ message: "digite um username" });
   }
 
-  if (username.length > 20) {
+  if (Username.length > 20) {
     return res
       .status(400)
       .json({ message: "O username não pode ter mais de 20 caracteres" });
@@ -67,7 +69,7 @@ userRouter.post("/register", async (req, res) => {
   }
 
   const verifyUsername = await UserModel.findOne({
-    where: { username: username },
+    where: { username: Username },
   });
 
   if (Boolean(verifyUsername) === true) {
@@ -79,7 +81,7 @@ userRouter.post("/register", async (req, res) => {
 
   const user = await UserModel.create({
     name,
-    username,
+    username: Username,
     email,
     password: hash,
     avatar,
@@ -245,7 +247,7 @@ userRouter.delete("/deleteaccount", verifytoken, async (req, res) => {
 userRouter.get("/user/:userId", async (req, res) => {
   const userId = Number(req.params.userId);
 
-  if (!userId) {
+  if (!userId || userId <= 0) {
     return res.status(404).json({ message: "id não encontrado" });
   }
 
@@ -264,7 +266,7 @@ userRouter.get("/user/:userId", async (req, res) => {
   });
 
   if (!user) {
-    return res.status(404).json({ message: "Usuarios não encontrados" });
+    return res.status(404).json({ message: "Usuário não encontrado" });
   }
 
   try {
@@ -393,6 +395,7 @@ userRouter.put("/user", verifytoken, async (req, res) => {
       .status(400)
       .json({ message: "O nome não pode ter mais de 40 caracteres" });
   }
+  const Username = String(username).toLocaleLowerCase();
 
   if (username.length > 20) {
     return res
@@ -411,17 +414,18 @@ userRouter.put("/user", verifytoken, async (req, res) => {
   if (!findUser) {
     res.status(403).json({ message: "usuario não encontrado!" });
   }
-  if (username !== "" && findUser.username !== username) {
+  if (Username !== "" && findUser.username !== Username) {
     const verifyUsername = await UserModel.findOne({
-      where: { username: username },
+      where: { username: Username },
     });
 
     if (verifyUsername) {
       return res.status(400).json({ message: "username já está em uso" });
     }
   }
+
   const data = {
-    username: username !== "" ? username : "",
+    username: Username !== "" ? Username : "",
     name: name !== "" ? name : "",
     biograph: biograph ? biograph : "",
     avatar: avatar !== "" ? avatar : "",

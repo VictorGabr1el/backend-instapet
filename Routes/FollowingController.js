@@ -19,6 +19,19 @@ followingRouter.post("/follow/:followId", verifytoken, async (req, res) => {
     return res.status(403).json({ message: "followId não encontrado" });
   }
 
+  const verifyIfFollowing = await FollowingModel.findOne({
+    where: {
+      userId: userId,
+      followingId: followId,
+    },
+  });
+
+  if (verifyIfFollowing) {
+    return res
+      .status(403)
+      .json({ message: "você já está seguindo este usuário" });
+  }
+
   const follow = await FollowingModel.create({
     userId: userId,
     followingId: followId,
