@@ -1,10 +1,10 @@
 import Jwt from "jsonwebtoken";
 
-function verifytoken(req, res, next) {
-  const authHeader = req.headers.authorization;
+function verifytoken(request, response, next) {
+  const authHeader = request.headers.authorization;
 
   if (!authHeader) {
-    return res
+    return response
       .status(401)
       .json({ message: "acesso negado, token inválido, token provided" });
   }
@@ -12,28 +12,28 @@ function verifytoken(req, res, next) {
   const parts = authHeader.split(" ");
 
   if (!parts) {
-    return res.status(401).json({ message: "token não encontrado" });
+    return response.status(401).json({ message: "token não encontrado" });
   }
 
   const [scheme, token] = parts;
 
   if (!/^Bearer$/i.test(scheme)) {
-    return res.status(401).json({ message: "token mal formated" });
+    return response.status(401).json({ message: "token mal formated" });
   }
 
   try {
     const secret = process.env.SECRET;
     Jwt.verify(token, secret, (error, decoded) => {
       if (error) {
-        return res.status(401).json({ message: "token inválido", error });
+        return response.status(401).json({ message: "token inválido", error });
       }
 
-      req.id = decoded.params;
+      request.id = decoded.params;
 
       return next();
     });
   } catch (error) {
-    return res
+    return response
       .status(500)
       .json({ message: "erro no servidor, tente mais tarde", error });
   }
