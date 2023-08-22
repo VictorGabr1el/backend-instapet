@@ -20,16 +20,12 @@ export const PostModel = sequelize.define("Posts", {
     allowNull: true,
     defaultValue: "",
   },
-  likes: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    defaultValue: 0,
-  },
 });
 
 PostModel.belongsTo(UserModel, {
   constraints: true,
   foreignKey: "userId",
+  onDelete: "CASCADE",
 });
 
 UserModel.hasMany(PostModel, {

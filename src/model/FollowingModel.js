@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "./db.js";
 import { UserModel } from "./UserModel.js";
 
-export const FollowersModel = sequelize.define("Followers", {
+export const FollowingModel = sequelize.define("Following", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -10,10 +10,12 @@ export const FollowersModel = sequelize.define("Followers", {
   },
 });
 
-FollowersModel.belongsTo(UserModel, {
-  foreignKey: "followersId",
+FollowingModel.belongsTo(UserModel, {
+  foreignKey: "followingId",
+  onDelete: "CASCADE",
 });
 
-UserModel.hasMany(FollowersModel, {
+UserModel.hasMany(FollowingModel, {
   foreignKey: "userId",
+  onDelete: "CASCADE",
 });

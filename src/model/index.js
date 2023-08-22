@@ -4,6 +4,7 @@ import { PostModel } from "./PostModel.js";
 import { CommentModel } from "./CommentModel.js";
 import { FollowingModel } from "./FollowingModel.js";
 import { FollowersModel } from "./FollowersModel.js";
+import { LikePostModel } from "./LikePostModel.js";
 
 // (async () => {
 //   await sequelize
@@ -21,4 +22,5 @@ export {
   CommentModel,
   FollowingModel,
   FollowersModel,
+  LikePostModel,
 };

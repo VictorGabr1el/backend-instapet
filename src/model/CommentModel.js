@@ -19,9 +19,11 @@ export const CommentModel = sequelize.define("Comment", {
 
 PostModel.hasMany(CommentModel, {
   foreignKey: "postId",
+  onDelete: "CASCADE",
 });
 
 CommentModel.belongsTo(UserModel, {
   constraints: true,
   foreignKey: "userId",
+  onDelete: "CASCADE",
 });
